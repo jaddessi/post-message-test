@@ -1,0 +1,55 @@
+<html>
+<body>
+
+<b>Frame 2</b><br>
+
+<div id="incomingMessage">Send me a message!</div>
+
+<form name="sendToParent">
+    <input type="text" name="msgToParent" value=""/>
+    <input type="submit" value="Send to parent"/>
+</form>
+
+<form name="sendToFrame1">
+    <input type="text" name="msgToFrame1" value=""/>
+    <input type="submit" value="Send to frame1"/>
+</form>
+
+<script>
+
+    document.forms.sendToParent.onsubmit = function () {
+        parent.postMessage(
+                this.elements.msgToParent.value,
+                "http://parent.localtest.com:8080"
+        )
+        return false
+    }
+
+    document.forms.sendToFrame1.onsubmit = function () {
+        var frames = parent.frames
+        for (var i = 0; i < frames.length; i++) {
+            frames[i].postMessage(
+                    this.elements.msgToFrame1.value,
+                    "http://frame1.localtest1.com:8080"
+            )
+        }
+        return false
+    }
+
+    function listener(event){
+	    var origin = event.origin || event.originalEvent.origin; // For Chrome, the origin property is in the event.originalEvent object.
+	    if ( origin == "http://parent.localtest.com:8080" || origin == "http://frame1.localtest1.com:8080") {
+            document.getElementById("incomingMessage").innerHTML = "received: " + event.data + " from " + event.origin
+        }
+    }
+
+    if (window.addEventListener){
+        addEventListener("message", listener, false)
+    } else {
+        attachEvent("onmessage", listener)
+    }
+
+</script>
+
+</body>
+</html>
